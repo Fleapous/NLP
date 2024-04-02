@@ -1,0 +1,27 @@
+﻿<div class="relative my-1 ma-4 accident-item" @onmouseenter="MouseEnter">
+    <MudPaper Elevation="4" Class="rounded-xl px-2 d-flex mx-2 align-center" Style="background-color: antiquewhite">
+        <MudIcon Size="Size.Medium" Color="Color.Dark" Icon="@Icons.CarCrash" Class="ml-1"/>
+        <MudText Align="Align.Left" Class="playfair-display-thin pa-2 pl-2" Color="Color.Dark">
+            @Accident.Headline
+        </MudText>
+    </MudPaper>
+    <MudPaper Elevation="0" Class="absolute rounded-xl px-2 d-flex mx-1 align-center" Style="top: -12px; left: 16px; background-color: antiquewhite">
+        <MudText Class="playfair-display-thin" Typo="Typo.caption" Color="Color.Dark">
+            @Accident.Latitude.ToString("F3"), @Accident.Longitude.ToString("F3")
+        </MudText>
+    </MudPaper>
+</div>
+
+@code {
+ 
+    [Parameter] public required Accident Accident { get; set; }
+    [Parameter] public EventCallback<Accident> OnMouseEnter { get; set; }
+    
+    
+    private async void MouseEnter()
+    {
+        if(OnMouseEnter.HasDelegate)
+            await OnMouseEnter.InvokeAsync(Accident);
+    }
+
+}

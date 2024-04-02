@@ -1,0 +1,49 @@
+﻿.main-div {
+    
+    height: 100vh;
+    width: 100%;
+    
+}
+
+.frosted {
+    box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
+    background-color: rgba(255, 255, 255, .25);
+    backdrop-filter: blur(5px);
+}
+
+.playfair-display-thin {
+   font-family: "Playfair Display", serif !important;
+   font-optical-sizing: auto !important;
+   font-weight: 400 !important;
+   font-style: normal !important;
+}
+
+.playfair-display-regular {
+    font-family: "Playfair Display", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+}
+
+.playfair-display-bold {
+    font-family: "Playfair Display", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 700 !important;
+    font-style: normal !important;
+}
+
+.playfair-display-black {
+    font-family: "Playfair Display", serif !important;
+    font-optical-sizing: auto !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+}
+
+.accident-item {
+    transition: scale 0.35s;
+    cursor: pointer !important;
+}
+
+.accident-item:hover {
+    scale: 1.05;
+}

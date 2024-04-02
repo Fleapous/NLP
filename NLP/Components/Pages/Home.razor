@@ -1,0 +1,106 @@
+﻿@page "/"
+@using System.Globalization
+@inject IJSRuntime JS
+
+<div class="main-div relative">
+    <div class="z-0 absolute" style="top: 0; left: 0; width: 100%; height: 100%;" id="map"></div>
+    <MudPaper Elevation="2" Class="absolute pa-3 rounded-xl frosted" Style="top: 25px; left: 25px;">
+        <MudStack Spacing="4">
+            <MudFab OnClick="ZoomIn" Size="Size.Small" StartIcon="@Icons.Add" Color="Color.Dark"/>
+            <MudFab OnClick="ResetPosition" Size="Size.Small" StartIcon="@Icons.GpsFixed" Color="Color.Dark"/>
+            <MudFab OnClick="ZoomOut" Size="Size.Small" StartIcon="@Icons.Remove" Color="Color.Dark"/>
+        </MudStack>
+    </MudPaper>
+    <MudPaper Elevation="2" Class="absolute py-4 px-6 rounded-xl justify-space-around frosted" Style="top: 25px; right: 25px; min-width: 20%; bottom: 25px">
+        <MudStack Spacing="4" Style="width: 100%; height: 100%">
+            <MudPaper Elevation="4" Class="rounded-xl px-2" Style="background-color: var(--mud-palette-dark)">
+                <MudText Typo="Typo.h3" Align="Align.Center" Class="playfair-display-regular pa-4" Style="color: white">
+                    Dhaka Crashes
+                </MudText>
+            </MudPaper>
+            <MudSpacer/>
+            <MudPaper Class="rounded-xl pa-4 flex-auto" Style="height: 66%; max-height: 66%;">
+                <MudPaper Elevation="0" Class="pa-4 overflow-y-scroll d-flex flex-column" Style="height: 100%;">
+                    @foreach (var accident in Accidents)
+                    {
+                        <AccidentItem Accident="@accident" OnMouseEnter="AccidentHovered"/>
+                    }
+                </MudPaper>
+            </MudPaper>   
+            <MudSpacer/>
+        </MudStack>
+    </MudPaper>
+</div>
+
+@code {
+    private List<Accident> Accidents { get; set; } = [];
+    private bool _zoomning;
+    private (double latitude, double longitude) originalPosition;
+    private int originalZoom;
+
+    protected override void OnInitialized()
+    {
+        Accidents =
+        [
+            new Accident(23.76466827516207, 90.37851136800585, "Crash at the museum road lake road thing."),
+            new Accident(23.79064754756162, 90.37565893469512, "Freak car crash in the metro station."),
+            new Accident(23.800854553159084, 90.39753873670637, "Golf cart drowned at the country club."),
+            new Accident(23.852220889166126, 90.3949270095699, "BMW driver almost hits plane. Fortunately beats up pilot afterwards."),
+            new Accident(23.83212633293127, 90.30434965210515, "Waitpid driver combusts spontaneously"),
+            new Accident(23.81250280741363, 90.48306115739439, "Asylum transporter bus dives deep into the river"),
+            new Accident(23.747318699791293, 90.4247521120687, "20 students almost killed by a drunk driver")
+        ];
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("makeMap");
+            foreach (var accident in Accidents)
+                await JS.InvokeVoidAsync("makePopup", accident.Latitude, accident.Longitude, accident.Headline);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task ZoomIn()
+    {
+        await JS.InvokeVoidAsync("zoomIn");
+    }
+
+    private async Task ZoomOut()
+    {
+        await JS.InvokeVoidAsync("zoomOut");
+    }
+
+    private async Task AccidentHovered(Accident accident)
+    {
+        if (!_zoomning)
+        {
+            _zoomning = true;
+            originalPosition = await GetCurrentPosition();
+            originalZoom = await JS.InvokeAsync<int>("getZoom");
+        }
+
+        await JS.InvokeVoidAsync("setView", accident.Latitude, accident.Longitude, 18);
+    }
+
+    private async Task<(double, double)> GetCurrentPosition()
+    {
+        var positionString = await JS.InvokeAsync<string>("getCenter");
+        var start = positionString.IndexOf('(');
+        var end = positionString.IndexOf(')');
+        positionString = positionString[(start + 1)..end];
+        var positionParts = positionString.Split(',');
+        var latitude = Convert.ToDouble(positionParts[0], CultureInfo.InvariantCulture);
+        var longitude = Convert.ToDouble(positionParts[1], CultureInfo.InvariantCulture);
+        return (latitude, longitude);
+    }
+
+    private async Task ResetPosition()
+    {
+        await JS.InvokeVoidAsync("resetPosition");
+    }
+
+}
