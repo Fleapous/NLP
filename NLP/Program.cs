@@ -1,12 +1,20 @@
+using Blazored.LocalStorage;
 using NLP.Components;
 using MudBlazor.Services;
+using NLP.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls("http://0.0.0.0:44350");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<HttpClient>();
+builder.Services.AddScoped<MapService>();
+builder.Services.AddScoped<LocationService>();
 builder.Services.AddMudServices();
 
 var app = builder.Build();

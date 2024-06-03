@@ -47,3 +47,43 @@
 .accident-item:hover {
     scale: 1.05;
 }
+
+.popup-dialog {
+    box-shadow: none;
+    position: absolute !important;
+}
+
+.mud-overlay .mud-overlay-scrim.mud-overlay-dark {
+    background-color: transparent !important;
+}
+
+.field {
+    padding: 2px 4px;
+    flex: none;
+}
+
+.field .mud-input-outlined-border {
+    border-radius: 16px !important;
+}
+
+.field .mud-input-control-input-container {
+    background-color: var(--mud-palette-surface);
+    display: flex;
+    height: 100%;
+    border-radius: 16px;
+}
+
+.field .mud-input {
+    cursor: inherit !important;
+    user-select: auto !important;
+    height: 100%;
+    border-radius: 16px;
+}
+
+.field .mud-input-label {
+    user-select: none !important;
+}
+
+.field .mud-icon-size-small {
+    font-size: 1em !important;
+}

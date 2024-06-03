@@ -1,0 +1,17 @@
+@inject IJSRuntime Js
+
+<div class="z-0 absolute"
+     style="@($"z-index: 0; position: absolute; top: {Top}; left: {Left}; bottom: {Bottom}; right: {Right}")"
+     id="map">
+</div>
+
+@code {
+
+    [Parameter] public string Top { get; set; } = string.Empty;
+    [Parameter] public string Left { get; set; } = string.Empty;
+    [Parameter] public string Bottom { get; set; } = string.Empty;
+    [Parameter] public string Right { get; set; } = string.Empty;
+    [Parameter] public string Style { get; set; } = string.Empty;
+    [Parameter] public string Class { get; set; } = string.Empty;
+    
+}

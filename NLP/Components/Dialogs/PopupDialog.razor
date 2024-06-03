@@ -1,0 +1,108 @@
+<MudDialog Class="popup-dialog rounded-xl py-4" ClassContent="pa-4"
+           Style="@($"top: {Top}px; left: {Left}px; width: {Width}px; height: {(int)(Height * 0.4)}px")">
+    <DialogContent>
+        @if (SelectedAccident is null)
+        {
+            <div style="width: 100%; height: 100%;" class="d-flex pa-4 flex-column gap-2 overflow-y-scroll">
+                @foreach (var accident in Group.Accidents)
+                {
+                    var localAccident = accident;
+                    <MudPaper Class="pa-2 rounded-xl white-text"
+                              Style="background-color: var(--mud-palette-dark); text-align: center"
+                              @onclick="@(() => AccidentClicked(localAccident))">
+                        <b style="max-width: 300px">@accident.Title</b>
+                    </MudPaper>
+                }
+            </div>
+        }
+        else
+        {
+            <MudPaper Class="rounded-xl pa-4 d-flex flex-column my-n4" 
+                      Style="@($"background-color: var(--mud-palette-dark); color: white; height: {(int)(Height * 0.4 - 32)}px;")">
+                <div class="d-flex align-center relative pb-2" style="height: fit-content">
+                    <MudIconButton Class="absolute" Style="left: 0; color: white" Icon="@Icons.ArrowBack" 
+                                   Size="Size.Medium" OnClick="@(() => AccidentClicked(null))"/>
+                    <MudSpacer/>
+                    <b style="text-align: center; max-width: 300px">@SelectedAccident.Title</b>
+                    <MudSpacer/>
+                    <MudIconButton Class="absolute" Style="right: 0; color: white" Icon="@Icons.Link" Href="@SelectedAccident.Url"/>
+                </div>
+                <div style="width: 100%; height: calc(100% - 24px)" class="overflow-y-scroll d-flex flex-wrap flex-auto">
+                    <Field Label="Publication Date">
+                        @SelectedAccident.PublicationDate?.ToString("d")
+                    </Field>
+                    <Field Label="Date">
+                        @SelectedAccident.DateTime?.ToString("d")
+                    </Field>
+                    <Field Label="Location" Width="100%">
+                        @SelectedAccident.ExactLocation
+                    </Field>
+                    <Field Label="# acc" Width="20%">
+                        @SelectedAccident.NumberOfAccidents
+                    </Field>
+                    <Field Label="Period" Width="20%">
+                        @SelectedAccident.Period
+                    </Field>
+                    <Field Label="Day" Width="60%">
+                        @SelectedAccident.DayOfTheWeek
+                    </Field>
+                    <Field Label="Surface" Width="33%">
+                        @SelectedAccident.Surface
+                    </Field>
+                    <Field Label="Type"  Width="33%">
+                        @SelectedAccident.Type
+                    </Field>
+                    <Field Label="Cause" Width="33%">
+                        @SelectedAccident.Cause
+                    </Field>
+                    <Field Label="Injuries" Width="20%" Flex="true">
+                        @(SelectedAccident.Injuries ?? 0)
+                    </Field>
+                    <Field Label="Casualties" Width="20%" Flex="true">
+                        @(SelectedAccident.Casualties ?? 0)
+                    </Field>
+                    <Field Label="Ages" Width="60%" 
+                           Hidden="@(SelectedAccident.Ages is null || SelectedAccident.Ages.Length == 0)">
+                        @(string.Join(", ", SelectedAccident.Ages ?? []))
+                    </Field>
+                    <MudDivider Style="width: 100%" Class="my-1"/>
+                    <Field Label="Primary" Flex="true" Width="33%" Hidden="@(SelectedAccident.PrimaryVehicle is null)">
+                        @SelectedAccident.PrimaryVehicle  
+                    </Field>
+                    <Field Label="Secondary" Flex="true" Width="33%" Hidden="@(SelectedAccident.SecondaryVehicle is null)">
+                        @SelectedAccident.SecondaryVehicle
+                    </Field>
+                    <Field Label="Tertiary" Flex="true" Width="33%" Hidden="@(SelectedAccident.TertiaryVehicle is null)">
+                        @SelectedAccident.TertiaryVehicle
+                    </Field>
+                    <Field Label="Others" Width="100%" Hidden="@(SelectedAccident.OtherVehicles is null)">
+                        @(string.Join(", ", SelectedAccident.OtherVehicles ?? []))
+                    </Field>
+                    <MudDivider Style="width: 100%" Class="my-1"/>
+                    <Field Label="Description" Width="100%">
+                        @SelectedAccident.Description
+                    </Field>
+                </div>
+            </MudPaper>
+        }
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public required AccidentGroup Group { get; set; }
+    [Parameter] public required int Height { get; set; }
+    
+    private Accident? SelectedAccident { get; set; }
+    
+    private const int Width = 450;
+    private int Y => (int)(Group.Position?.Y ?? 0);
+    private int Top => Y > Height / 2 ? (int)(Y - 0.4 * Height) - 62 : Y;
+    private int Left => (int)(Group.Position?.X ?? 0) - Width / 2;
+
+    private void AccidentClicked(Accident? accident)
+    {
+        SelectedAccident = accident;
+    }
+}
