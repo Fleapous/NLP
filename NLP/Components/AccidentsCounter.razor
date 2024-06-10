@@ -1,0 +1,34 @@
+<MudPaper Class="rounded-xl flex-auto d-flex flex-column" Style="overflow: clip">
+    <div class="d-flex flex-auto" style="width: 100%">
+        <div class="flex-1 d-flex justify-center align-center mud-theme-success">
+            <MudText Align="Align.Center" Typo="Typo.h5">
+                <b>
+                    @Done
+                </b>
+            </MudText>
+        </div>
+        <div class="flex-1 d-flex justify-center align-center mud-theme-warning">
+            <MudText Align="Align.Center" Typo="Typo.h5">
+                <b>
+                    @Failed
+                </b>
+            </MudText>
+        </div>
+        <div class="flex-1 d-flex justify-center align-center mud-theme-info">
+            <MudText Align="Align.Center" Typo="Typo.h5">
+                <b>
+                    @All
+                </b>
+            </MudText>
+        </div>
+    </div>
+    <MudProgressLinear Class="flex-none" Size="Size.Large" Color="Color.Dark" Striped="@(Done + Failed < (All - 1))" Value="@(Done + Failed)" Max="@All"/>
+</MudPaper>
+
+@code {
+    
+    [Parameter] public int Done { get; set; }
+    [Parameter] public int Failed { get; set; }
+    [Parameter] public int All { get; set; }
+
+}

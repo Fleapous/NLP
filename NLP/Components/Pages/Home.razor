@@ -2,10 +2,12 @@
 @using Blazored.LocalStorage
 @using Color = MudBlazor.Color
 @using Size = MudBlazor.Size
+
 @inject MapService MapService
 @inject LocationService LocationService
 @inject ILocalStorageService LocalStorage
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <PageTitle>Accidents</PageTitle>
 
@@ -28,27 +30,82 @@
             <MudFab OnClick="@MapService.ZoomOut" Size="Size.Small" StartIcon="@Icons.Remove" Color="Color.Dark"/>
         </MudStack>
     </MudPaper>
-    <MudPaper Elevation="2" Class="absolute py-4 px-6 rounded-xl justify-space-around frosted" Style="top: 25px; right: 25px; min-width: 30%; width: 30%; bottom: 25px"
+    <MudPaper Elevation="2" Class="absolute py-4 px-6 rounded-xl justify-space-around frosted" Style="top: 25px; right: 25px; min-width: 30%; width: 40%; bottom: 25px"
               @onmouseenter="@AccidentTabHovered" @onmouseleave="@AccidentTabUnhovered">
         <MudStack Spacing="4" Style="width: 100%; height: 100%">
-            <MudPaper Elevation="4" Class="rounded-xl px-2" Style="background-color: var(--mud-palette-dark)">
-                <MudText Typo="Typo.h3" Align="Align.Center" Class="playfair-display-regular pa-4" Style="color: white">
-                    Accidents
-                </MudText>
-            </MudPaper>
-            <MudSpacer/>
-            <MudPaper Class="rounded-xl pa-4 flex-auto" Style="height: 66%; max-height: 66%;">
-                <MudPaper Elevation="0" Class="pa-4 overflow-y-scroll d-flex flex-column" Style="height: 100%;">
-                    @foreach (var accident in DisplayAccidents)
+            <MudPaper Elevation="4" Class="rounded-xl d-flex gap-2 pa-2 align-center justify-center">
+                <MudSelect Variant="Variant.Outlined" T="string?" Label="Day" ValueChanged="DayChanged" Value="@((Filters.ContainsKey("Day") ? Filters["Day"].ToString() : string.Empty))">
+                    <MudSelectItem T="string?" Value="null"/>
+                    @foreach (var day in Days)
                     {
-                        <AccidentItem Accident="@accident" OnMouseEnter="AccidentHovered"/>
+                        <MudSelectItem T="string?" Value="day"/>
                     }
-                </MudPaper>
+                </MudSelect>
+                <MudSelect Variant="Variant.Outlined" T="string?" Label="Surface" ValueChanged="SurfaceChanged" 
+                           Value="@((Filters.ContainsKey("Surface") ? Filters["Surface"].ToString() : string.Empty))">
+                    <MudSelectItem T="string?" Value="null"/>
+                    @foreach (var surface in Surfaces)
+                    {
+                        <MudSelectItem T="string?" Value="surface"/>
+                    }
+                </MudSelect>
+                <MudSelect Variant="Variant.Outlined" T="string?" Label="Type" ValueChanged="TypeChanged" 
+                           Value="@((Filters.ContainsKey("Type") ? Filters["Type"].ToString() : string.Empty))">
+                    <MudSelectItem T="string?" Value="null"/>
+                    @foreach (var type in Types)
+                    {
+                        <MudSelectItem T="string?" Value="type"/>
+                    }
+                </MudSelect>
+                <MudSelect Variant="Variant.Outlined" T="string?" Label="Cause" ValueChanged="CauseChanged" 
+                           Value="@((Filters.ContainsKey("Cause") ? Filters["Cause"].ToString() : string.Empty))">
+                    <MudSelectItem T="string?" Value="null"/>
+                    @foreach (var cause in Causes)
+                    {
+                        <MudSelectItem T="string?" Value="cause"/>
+                    }
+                </MudSelect>
+                <div class="d-flex">
+                    <MudTooltip Text="@(InjuriesOnly ? "Show all" : "Show only with injuries")">
+                        <MudToggleIconButton Icon="@Icons.PersonalInjury" ToggledIcon="@Icons.PersonalInjury" 
+                                             Color="Color.Default" ToggledColor="Color.Warning"
+                                             Toggled="@InjuriesOnly" ToggledChanged="InjuriesOnlyChanged"/>
+                    </MudTooltip>
+                    <MudTooltip Text="@(CasualtiesOnly ? "Show all" : "Show only with casualties")">
+                        <MudToggleIconButton Icon="@Icons.PersonOutline" ToggledIcon="@Icons.PersonOutline" 
+                                             Color="Color.Default" ToggledColor="Color.Error"
+                                             Toggled="@CasualtiesOnly" ToggledChanged="CasualtiesOnlyChanged"/>
+                    </MudTooltip>
+                    <MudTooltip Text="@(CasualtiesOnly ? "Show all" : "Show only manually added")">
+                        <MudToggleIconButton Icon="@Icons.FrontHand" ToggledIcon="@Icons.FrontHand"
+                                             Color="Color.Default" ToggledColor="Color.Info"
+                                             Toggled="@ManualOnly" ToggledChanged="ManualOnlyChanged"/>
+                    </MudTooltip>
+                </div>
             </MudPaper>
-            <MudSpacer/>
-            <MudPaper Class="rounded-xl pa-4 flex-auto">
-                <MudText>@Accidents.Count / @(Accidents.Count + NewAccidents.Count + LoadingOffset)</MudText>
+            <MudPaper Class="rounded-xl pa-2 d-flex justify-center align-center gap-2">
+                <MudTextField T="string" @bind-Text="@ManualUrl" Variant="Variant.Outlined" Label="Url"/>
+                <MudButton Color="Color.Info" Class="rounded-pill px-2" OnClick="AddManualClick" Variant="Variant.Filled"
+                           Disabled="@ManualUrlLoading">
+                    @if(!ManualUrlLoading)
+                    {
+                        <span>Add accident</span>
+                    }
+                    else
+                    {
+                        <MudProgressCircular Indeterminate="true" Color="Color.Dark"/>
+                    }
+                </MudButton>
             </MudPaper>
+            <MudPaper Class="rounded-xl flex-auto accidents-list flex-auto" Style="height: 70%; overflow: clip">
+                <MudDataGrid Items="FilteredAccidents" FixedHeader="true" Dense="true" Style="height: 100%"
+                             RowClass="clickable-row" RowClick="@((DataGridRowClickEventArgs<Accident> args) => RowClicked(args.Item))">
+                    <Columns>
+                        <PropertyColumn Title="Title" Property="@(a => a.Title)"/>
+                    </Columns>
+                </MudDataGrid>
+            </MudPaper>
+            <AccidentsCounter Done="@Accidents.Count" Failed="@TriedUrls.Count" All="@AccidentCount"/>
         </MudStack>
     </MudPaper>
 </div>

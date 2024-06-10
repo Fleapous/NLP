@@ -87,3 +87,16 @@
 .field .mud-icon-size-small {
     font-size: 1em !important;
 }
+
+.accidents-list .mud-table-container {
+    height: 100%;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 250ms cubic-bezier(.4, 0, .2, 1) 0ms;
+}
+
+.clickable-row:hover {
+    background-color: var(--mud-palette-primary-hover) !important;
+}

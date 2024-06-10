@@ -32,6 +32,7 @@ public class Accident(string url)
     public string? SecondaryVehicle;
     public string? TertiaryVehicle;
     public string[]? OtherVehicles;
+    public bool IsManual = false;
     
     public Point ScreenPosition { get; set; } = new(0, 0);
     

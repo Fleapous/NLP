@@ -20,8 +20,11 @@
             <MudPaper Class="rounded-xl pa-4 d-flex flex-column my-n4" 
                       Style="@($"background-color: var(--mud-palette-dark); color: white; height: {(int)(Height * 0.4 - 32)}px;")">
                 <div class="d-flex align-center relative pb-2" style="height: fit-content">
-                    <MudIconButton Class="absolute" Style="left: 0; color: white" Icon="@Icons.ArrowBack" 
-                                   Size="Size.Medium" OnClick="@(() => AccidentClicked(null))"/>
+                    @if (Group.Accidents.Count > 1)
+                    {
+                        <MudIconButton Class="absolute" Style="left: 0; color: white" Icon="@Icons.ArrowBack"
+                                       Size="Size.Medium" OnClick="@(() => AccidentClicked(null))"/>
+                    }
                     <MudSpacer/>
                     <b style="text-align: center; max-width: 300px">@SelectedAccident.Title</b>
                     <MudSpacer/>
@@ -100,6 +103,12 @@
     private int Y => (int)(Group.Position?.Y ?? 0);
     private int Top => Y > Height / 2 ? (int)(Y - 0.4 * Height) - 62 : Y;
     private int Left => (int)(Group.Position?.X ?? 0) - Width / 2;
+
+    protected override void OnParametersSet()
+    {
+        if (Group.Accidents.Count == 1)
+            SelectedAccident = Group.Accidents.First();
+    }
 
     private void AccidentClicked(Accident? accident)
     {
