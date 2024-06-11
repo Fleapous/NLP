@@ -18,4 +18,10 @@
       <None Include="wwwroot\main.js" />
     </ItemGroup>
 
+
+    <ItemGroup>
+      <Folder Include="data acquisition module\" />
+      <Folder Include="data processing module\comparisonScripts\" />
+    </ItemGroup>
+
 </Project>
