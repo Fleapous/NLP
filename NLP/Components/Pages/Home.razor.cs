@@ -67,6 +67,8 @@ public partial class Home
                          .Where(a => a.Cause is not null)
                          .Select(a => a.Cause!))
                 Causes.Add(cause);
+
+            SelectedDateRange = new DateRange(Accidents.Min(a => a.DateTime), Accidents.Max(a => a.DateTime));
         });
     }
 
@@ -145,7 +147,7 @@ public partial class Home
             if (fields[7] is not "NA" && fields[7].Length != 0)
                 accident.DayOfTheWeek = fields[7];
             if (fields[8] is not "NA" && fields[8].Length != 0)
-                accident.ExactLocation = fields[8];
+                accident.ExactLocation = accident.Street = fields[8];
             if (fields[9] is not "NA" && fields[9].Length != 0)
                 accident.State = fields[9];
             if (fields[10] is not "NA" && fields[10].Length != 0)
@@ -497,6 +499,22 @@ public partial class Home
 
         ApplyFilters();
     }
+
+    private void ValueChanged(string name, string? value, Func<Accident, bool> predicate)
+    {
+        var filter = new Filter(
+            value,
+            predicate
+        );
+        Filters.Remove(name);
+        if(value is not null)
+            Filters.Add(name, filter);
+        
+        ApplyFilters();
+    }
+
+    private HashSet<string> GetUnique(Func<Accident, string?> property) =>
+        [..Accidents.Select(property).OfType<string>()];
     
     private void ApplyFilters() => FilteredAccidents = Accidents.Where(a => Filters.All(f => f.Value.Invoke(a))).ToList();
     
@@ -536,6 +554,8 @@ public partial class Home
     }
 
     private bool ManualUrlLoading { get; set; } = false;
+    public bool FiltersExpanded { get; set; }
+    public DateRange? SelectedDateRange { get; set; }
 
 
     private async Task<int> RunPython(string command)
@@ -625,5 +645,23 @@ public partial class Home
             ManualUrlLoading = false;
             StateHasChanged();
         });
+    }
+
+    public string GetFilterValue(string name) =>
+        Filters.ContainsKey(name) ? Filters[name].ToString() : string.Empty;
+    
+    private void SelectedDateRangeChanged(DateRange? dateRange)
+    {
+        SelectedDateRange = dateRange;
+        Filters.Remove("Date");
+        if(dateRange is not null)
+            Filters.Add("Date", 
+                new Filter(
+                    dateRange,
+                    a => a.DateTime > dateRange.Start && a.DateTime < dateRange.End
+                )
+            ); 
+        
+        ApplyFilters();
     }
 }

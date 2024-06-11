@@ -19,7 +19,7 @@
     </Map>
     @foreach (var group in DisplayGroups)
     {
-        <MudFab Label="@($"{group.Accidents.Count}")" Class="absolute white-text" 
+        <MudFab Label="@($"{group.Accidents.Count}")" Class="absolute white-text"
                 Style="@(GetPositionString(group.Position) + ";background-color: var(--mud-palette-dark);")"
                 OnClick="@(() => ShowPopup(group))"/>
     }
@@ -30,49 +30,51 @@
             <MudFab OnClick="@MapService.ZoomOut" Size="Size.Small" StartIcon="@Icons.Remove" Color="Color.Dark"/>
         </MudStack>
     </MudPaper>
-    <MudPaper Elevation="2" Class="absolute py-4 px-6 rounded-xl justify-space-around frosted" Style="top: 25px; right: 25px; min-width: 30%; width: 40%; bottom: 25px"
+    <MudPaper Elevation="2" Class="absolute py-4 px-6 rounded-xl justify-space-around frosted" Style="top: 25px; right: 25px; width: 40%; max-width: 750px; bottom: 25px"
               @onmouseenter="@AccidentTabHovered" @onmouseleave="@AccidentTabUnhovered">
         <MudStack Spacing="4" Style="width: 100%; height: 100%">
-            <MudPaper Elevation="4" Class="rounded-xl d-flex gap-2 pa-2 align-center justify-center">
-                <MudSelect Variant="Variant.Outlined" T="string?" Label="Day" ValueChanged="DayChanged" Value="@((Filters.ContainsKey("Day") ? Filters["Day"].ToString() : string.Empty))">
-                    <MudSelectItem T="string?" Value="null"/>
-                    @foreach (var day in Days)
-                    {
-                        <MudSelectItem T="string?" Value="day"/>
-                    }
-                </MudSelect>
-                <MudSelect Variant="Variant.Outlined" T="string?" Label="Surface" ValueChanged="SurfaceChanged" 
-                           Value="@((Filters.ContainsKey("Surface") ? Filters["Surface"].ToString() : string.Empty))">
-                    <MudSelectItem T="string?" Value="null"/>
-                    @foreach (var surface in Surfaces)
-                    {
-                        <MudSelectItem T="string?" Value="surface"/>
-                    }
-                </MudSelect>
-                <MudSelect Variant="Variant.Outlined" T="string?" Label="Type" ValueChanged="TypeChanged" 
-                           Value="@((Filters.ContainsKey("Type") ? Filters["Type"].ToString() : string.Empty))">
-                    <MudSelectItem T="string?" Value="null"/>
-                    @foreach (var type in Types)
-                    {
-                        <MudSelectItem T="string?" Value="type"/>
-                    }
-                </MudSelect>
-                <MudSelect Variant="Variant.Outlined" T="string?" Label="Cause" ValueChanged="CauseChanged" 
-                           Value="@((Filters.ContainsKey("Cause") ? Filters["Cause"].ToString() : string.Empty))">
-                    <MudSelectItem T="string?" Value="null"/>
-                    @foreach (var cause in Causes)
-                    {
-                        <MudSelectItem T="string?" Value="cause"/>
-                    }
-                </MudSelect>
-                <div class="d-flex">
+            <MudPaper Elevation="4" Class="rounded-xl d-flex flex-column gap-2 pa-2" 
+                      Style="@($"height: {(FiltersExpanded ? "240px" : "80px")}; transition: height 200ms ease-in-out; overflow: clip")">
+                <div class="d-flex align-center">
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Day" ValueChanged="DayChanged"
+                               Value="@(GetFilterValue("Day"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var day in Days)
+                        {
+                            <MudSelectItem T="string?" Value="day"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Surface" ValueChanged="SurfaceChanged"
+                               Value="@(GetFilterValue("Surface"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var surface in Surfaces)
+                        {
+                            <MudSelectItem T="string?" Value="surface"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Type" ValueChanged="TypeChanged"
+                               Value="@(GetFilterValue("Type"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var type in Types)
+                        {
+                            <MudSelectItem T="string?" Value="type"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Cause" ValueChanged="CauseChanged"
+                               Value="@(GetFilterValue("Cause"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var cause in Causes)
+                        {
+                            <MudSelectItem T="string?" Value="cause"/>
+                        }
+                    </MudSelect>
                     <MudTooltip Text="@(InjuriesOnly ? "Show all" : "Show only with injuries")">
-                        <MudToggleIconButton Icon="@Icons.PersonalInjury" ToggledIcon="@Icons.PersonalInjury" 
+                        <MudToggleIconButton Icon="@Icons.PersonalInjury" ToggledIcon="@Icons.PersonalInjury"
                                              Color="Color.Default" ToggledColor="Color.Warning"
                                              Toggled="@InjuriesOnly" ToggledChanged="InjuriesOnlyChanged"/>
                     </MudTooltip>
                     <MudTooltip Text="@(CasualtiesOnly ? "Show all" : "Show only with casualties")">
-                        <MudToggleIconButton Icon="@Icons.PersonOutline" ToggledIcon="@Icons.PersonOutline" 
+                        <MudToggleIconButton Icon="@Icons.PersonOutline" ToggledIcon="@Icons.PersonOutline"
                                              Color="Color.Default" ToggledColor="Color.Error"
                                              Toggled="@CasualtiesOnly" ToggledChanged="CasualtiesOnlyChanged"/>
                     </MudTooltip>
@@ -81,13 +83,91 @@
                                              Color="Color.Default" ToggledColor="Color.Info"
                                              Toggled="@ManualOnly" ToggledChanged="ManualOnlyChanged"/>
                     </MudTooltip>
+                    <MudTooltip Text="@(CasualtiesOnly ? "Show all" : "Show only manually added")">
+                        <MudToggleIconButton Icon="@Icons.ExpandMore" ToggledIcon="@Icons.ExpandLess"
+                                             Color="Color.Default" ToggledColor="Color.Default"
+                                             @bind-Toggled="@FiltersExpanded"/>
+                    </MudTooltip>
+                </div>
+                <div class="d-flex align-center">
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Street" 
+                               ValueChanged="@(value => ValueChanged("Street", value, a => a.Street == value))"
+                               Value="@(GetFilterValue("Street"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.Street))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Subdistrict"
+                               ValueChanged="@(value => ValueChanged("Subdistrict", value, a => a.Subdistrict == value))"
+                               Value="@(GetFilterValue("Subdistrict"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.Subdistrict))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="District"
+                               ValueChanged="@(value => ValueChanged("District", value, a => a.District == value))"
+                               Value="@(GetFilterValue("District"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.District))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                    @* <MudSelect Variant="Variant.Outlined" T="string?" Label="City" *@
+                    @*            ValueChanged="@(value => ValueChanged("City", value, a => a.City == value))" *@
+                    @*            Value="@(GetFilterValue("City"))"> *@
+                    @*     <MudSelectItem T="string?" Value="null"/> *@
+                    @*     @foreach (var value in GetUnique(a => a.City)) *@
+                    @*     { *@
+                    @*         <MudSelectItem T="string?" Value="value"/> *@
+                    @*     } *@
+                    @* </MudSelect> *@
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="County"
+                               ValueChanged="@(value => ValueChanged("County", value, a => a.County == value))"
+                               Value="@(GetFilterValue("County"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.County))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="State"
+                               ValueChanged="@(value => ValueChanged("State", value, a => a.State == value))"
+                               Value="@(GetFilterValue("State"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.State))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                    <MudSelect Variant="Variant.Outlined" T="string?" Label="Country"
+                               ValueChanged="@(value => ValueChanged("Country", value, a => a.Country == value))"
+                               Value="@(GetFilterValue("Country"))">
+                        <MudSelectItem T="string?" Value="null"/>
+                        @foreach (var value in GetUnique(a => a.Country))
+                        {
+                            <MudSelectItem T="string?" Value="value"/>
+                        }
+                    </MudSelect>
+                </div>
+                <div class="d-flex gap-4 align-center">
+                    <MudDateRangePicker Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog"
+                                        MinDate="@(Accidents.Min(a => a.DateTime))" MaxDate="@(Accidents.Max(a => a.DateTime))"
+                                        DateRange="@SelectedDateRange" DateRangeChanged="SelectedDateRangeChanged"/>
+                    <MudTooltip Text="Clear date">
+                        <MudIconButton Icon="@Icons.Clear" Color="Color.Default" OnClick="@(() => SelectedDateRangeChanged(null))"/>
+                    </MudTooltip>
                 </div>
             </MudPaper>
             <MudPaper Class="rounded-xl pa-2 d-flex justify-center align-center gap-2">
                 <MudTextField T="string" @bind-Text="@ManualUrl" Variant="Variant.Outlined" Label="Url"/>
                 <MudButton Color="Color.Info" Class="rounded-pill px-2" OnClick="AddManualClick" Variant="Variant.Filled"
                            Disabled="@ManualUrlLoading">
-                    @if(!ManualUrlLoading)
+                    @if (!ManualUrlLoading)
                     {
                         <span>Add accident</span>
                     }
@@ -97,7 +177,7 @@
                     }
                 </MudButton>
             </MudPaper>
-            <MudPaper Class="rounded-xl flex-auto accidents-list flex-auto" Style="height: 70%; overflow: clip">
+            <MudPaper Class="rounded-xl flex-auto accidents-list flex-auto" Style="height: 1%; overflow: clip">
                 <MudDataGrid Items="FilteredAccidents" FixedHeader="true" Dense="true" Style="height: 100%"
                              RowClass="clickable-row" RowClick="@((DataGridRowClickEventArgs<Accident> args) => RowClicked(args.Item))">
                     <Columns>
